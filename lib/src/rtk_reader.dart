@@ -65,7 +65,7 @@ class RTKReader extends Service {
 
     _buffer.removeRange(0, endIndex + 1);
 
-    logger.info("Got RTK Message!");
+    logger.debug("Decoded ${_buffer.length} RTCM packet");
 
     final message = RoverPosition(rtkMessage: fullPacket);
 

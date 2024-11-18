@@ -1,3 +1,4 @@
+import "package:base_station/src/imu.dart";
 import "package:burt_network/burt_network.dart";
 
 import "antenna.dart";
@@ -11,6 +12,7 @@ class BaseStationCollection extends Service {
 
   final gps = GpsReader();
   final antenna = AntennaControl();
+  final imu = ImuReader();
 
   @override
   Future<bool> init() async {
@@ -18,6 +20,7 @@ class BaseStationCollection extends Service {
     result &= await server.init();
     result &= await gps.init();
     result &= await antenna.init();
+    result &= await imu.init();
 
     if (result) {
       logger.info("Base Station ready");

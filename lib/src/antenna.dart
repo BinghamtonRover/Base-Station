@@ -11,16 +11,16 @@ class AntennaControl extends Service {
   /// Firmware for the antenna
   final firmware = BurtFirmwareSerial(port: port, logger: logger);
 
-  AntennaCommand _currentCommand = AntennaCommand();
+  final BaseStationCommand _currentCommand = BaseStationCommand();
 
   @override
   Future<bool> init() async {
     final result = firmware.init();
     firmware.messages.listen(collection.server.sendWrapper);  // send AntennaData to the Dashboard
-    collection.server.messages.onMessage<AntennaCommand>(
-      name: AntennaCommand().messageName,
-      constructor: AntennaCommand.fromBuffer,
-       callback: _handleAntennaCommand,
+    collection.server.messages.onMessage<BaseStationCommand>(
+      name: BaseStationCommand().messageName,
+      constructor: BaseStationCommand.fromBuffer,
+       callback: _handleBaseStationCommand,
     );
     collection.server.messages.onMessage<GpsCoordinates>(
       name: GpsCoordinates().messageName,
@@ -33,11 +33,11 @@ class AntennaControl extends Service {
   @override
   Future<void> dispose() => firmware.dispose();
 
-  void _handleAntennaCommand(AntennaCommand command) {
+  void _handleBaseStationCommand(BaseStationCommand command) {
     // handshake back to dashboard
     collection.server.sendMessage(command);
 
-    _currentCommand = command;
+    _currentCommand.mergeFromMessage(command);
 
     // TODO: Implement logic and stuff
   }

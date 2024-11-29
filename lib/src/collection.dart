@@ -8,6 +8,13 @@ final logger = BurtLogger();
 class BaseStationCollection extends Service {
   late final server = RoverSocket(port: 8005, device: Device.BASE_STATION, collection: this);
 
+  static final GpsCoordinates stationCoordinates = GpsCoordinates(
+    latitude: 0,
+    longitude: 0,
+  );
+
+  static const double angleTolerance = 5;
+
   final gps = GpsReader();
   final antenna = AntennaControl();
 

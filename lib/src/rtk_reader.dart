@@ -4,18 +4,29 @@ import "dart:io";
 import "package:base_station/base_station.dart";
 import "package:burt_network/burt_network.dart";
 
+/// The socket for the subsystems program, which
+/// will write the RTCM packets to the serial device
 final subsystemsSocket = SocketInfo(
   address: InternetAddress("192.168.1.20"),
   port: 8001,
 );
 
+/// Service for reading and sending RTCM messages to the subsystems
+/// program, which significantly enhances accuracy on the Rover's GPS.
+///
+/// This service only reads and sends the data, it will
+/// not process or try to interpret it. All of the logic
+/// for the RTK algorithm is done onboard the Rover's GPS device.
 class RTKReader extends Service {
+  /// The COM port for the RTK GPS device
   static const rtkPort = "COM4";
 
   static const _first = 0xD3;
 
+  /// Logger for the RTK reader service
   final logger = BurtLogger();
 
+  /// Serial device for the RTK gps, only sends RTCM3 packets
   late final SerialDevice serial = SerialDevice(
     portName: rtkPort,
     readInterval: const Duration(milliseconds: 10),

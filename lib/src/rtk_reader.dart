@@ -19,7 +19,7 @@ final subsystemsSocket = SocketInfo(
 /// for the RTK algorithm is done onboard the Rover's GPS device.
 class RTKReader extends Service {
   /// The COM port for the RTK GPS device
-  static const rtkPort = "COM4";
+  static const rtkPort = "/dev/rtk_gps";
 
   static const _first = 0xD3;
 

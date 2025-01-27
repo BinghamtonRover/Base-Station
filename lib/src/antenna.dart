@@ -24,7 +24,7 @@ class AntennaControl extends Service {
 
   @override
   Future<bool> init() async {
-    final rtkPort = (await Process.run("realpath", ["/dev/rtk_gps"])).stdout.trim();
+    final rtkPort = (await Process.run("realpath", ["/dev/rover_gps"])).stdout.trim();
     final validPorts = DelegateSerialPort.allPorts.toSet().difference({rtkPort});
 
     for (final port in validPorts) {

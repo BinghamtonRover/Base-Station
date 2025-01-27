@@ -1,44 +1,74 @@
+import "dart:async";
 import "dart:math";
 
 import "package:burt_network/burt_network.dart";
 
 import "collection.dart";
 
+/// Receives base station commands and translate it into appropriate commands for
+/// the antenna firmware
+/// 
+/// This also handles the logic for "auto tracking" the antenna to point towards the rover.
 class AntennaControl extends Service {
-  /// Serial port for the firmware
-  static const port = "/dev/base-station-antenna";
-
   /// Firmware for the antenna
-  final firmware = BurtFirmwareSerial(port: port, logger: logger);
+  BurtFirmwareSerial? firmware;
 
   BaseStationCommand _currentCommand = BaseStationCommand();
 
   final AntennaFirmwareData _firmwareData = AntennaFirmwareData();
 
+  StreamSubscription<AntennaFirmwareData>? _firmwareSubscription;
+  StreamSubscription<BaseStationCommand>? _commandSubscription;
+  StreamSubscription<GpsCoordinates>? _coordinatesSubscription;
+
   @override
   Future<bool> init() async {
-    final result = firmware.init();
-    firmware.messages.listen((message) {
-      collection.server.sendWrapper(message);
-      if (message.name == AntennaFirmwareData().messageName) {
-        _firmwareData.mergeFromBuffer(message.data);
+    final validPorts = DelegateSerialPort.allPorts.toSet().difference({"/dev/rtk_gps"});
+
+    for (final port in validPorts) {
+      final firmwareCandidate = BurtFirmwareSerial(port: port, logger: logger);
+      if (await firmwareCandidate.init() &&
+          firmwareCandidate.isReady &&
+          firmwareCandidate.device == Device.ANTENNA) {
+        firmware = firmwareCandidate;
+        break;
+      } else {
+        await firmwareCandidate.dispose();
       }
-    });
-    collection.server.messages.onMessage<BaseStationCommand>(
+    }
+    if (firmware == null) {
+      return false;
+    }
+    _firmwareSubscription = firmware?.messages.onMessage(
+      name: AntennaFirmwareData().messageName,
+      constructor: AntennaFirmwareData.fromBuffer,
+      callback: (message) {
+        collection.server.sendMessage(message);
+        _firmwareData.mergeFromMessage(message);
+      },
+    );
+    _commandSubscription = collection.server.messages.onMessage<BaseStationCommand>(
       name: BaseStationCommand().messageName,
       constructor: BaseStationCommand.fromBuffer,
       callback: _handleBaseStationCommand,
     );
-    collection.server.messages.onMessage<GpsCoordinates>(
+    _coordinatesSubscription = collection.server.messages.onMessage<GpsCoordinates>(
       name: GpsCoordinates().messageName,
       constructor: GpsCoordinates.fromBuffer,
       callback: _handleGpsData,
     );
-    return result;
+    return true;
   }
 
   @override
-  Future<void> dispose() => firmware.dispose();
+  Future<void> dispose() async {
+    await _firmwareSubscription?.cancel();
+    await _commandSubscription?.cancel();
+    await _coordinatesSubscription?.cancel();
+    await firmware?.dispose();
+    // prevent possible "false success" if init() is called again
+    firmware = null;
+  }
 
   void _handleBaseStationCommand(BaseStationCommand command) {
     // handshake back to dashboard
@@ -46,16 +76,11 @@ class AntennaControl extends Service {
 
     _currentCommand = command;
 
-    switch (command.mode) {
-      case AntennaControlMode.ANTENNA_CONTROL_MODE_UNDEFINED:
-        firmware.sendMessage(AntennaFirmwareCommand(stop: true));
-      case AntennaControlMode.MANUAL_CONTROL:
-        firmware.sendMessage(command.manualCommand);
-      case AntennaControlMode.TRACK_ROVER:
-        break;
-    }
-
-    if (command.hasRoverCoordinatesOverrideOverride()) {
+    if (command.hasManualCommand() &&
+        command.mode == AntennaControlMode.MANUAL_CONTROL) {
+      firmware?.sendMessage(command.manualCommand);
+    } else if (command.hasRoverCoordinatesOverrideOverride() &&
+        command.mode == AntennaControlMode.TRACK_ROVER) {
       _handleGpsData(command.roverCoordinatesOverrideOverride, true);
     }
   }
@@ -65,8 +90,7 @@ class AntennaControl extends Service {
       return;
     }
 
-    if (_currentCommand.hasRoverCoordinatesOverrideOverride() &&
-        !isRoverOverride) {
+    if (_currentCommand.hasRoverCoordinatesOverrideOverride() && !isRoverOverride) {
       return;
     }
 
@@ -78,11 +102,11 @@ class AntennaControl extends Service {
     final roverMeters = coordinates.inMeters;
 
     final (deltaX, deltaY) = (
-      baseStationMeters.lat - roverMeters.lat,
-      baseStationMeters.long - roverMeters.long,
+      roverMeters.lat - baseStationMeters.lat,
+      roverMeters.long - baseStationMeters.long,
     );
 
-    final angle = atan2(deltaY, deltaX) - pi;
+    final angle = atan2(deltaY, deltaX);
 
     var targetDiff = angle - _firmwareData.swivel.targetAngle;
 
@@ -92,7 +116,7 @@ class AntennaControl extends Service {
       targetDiff -= 2 * pi;
     }
 
-    if (targetDiff.abs() < BaseStationCollection.angleTolerance * pi / 180) {
+    if (targetDiff.abs() < BaseStationCollection.angleTolerance) {
       logger.debug(
         "Ignoring GPS Data",
         body: "Antenna is already within the angle tolerance",
@@ -100,7 +124,7 @@ class AntennaControl extends Service {
       return;
     }
 
-    firmware.sendMessage(
+    firmware?.sendMessage(
       AntennaFirmwareCommand(
         swivel: MotorCommand(angle: angle),
       ),

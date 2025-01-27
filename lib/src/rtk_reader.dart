@@ -19,7 +19,7 @@ final subsystemsSocket = SocketInfo(
 /// for the RTK algorithm is done onboard the Rover's GPS device.
 class RTKReader extends Service {
   /// The COM port for the RTK GPS device
-  static const rtkPort = "/dev/rtk_gps";
+  static const rtkPort = "/dev/rover_gps";
 
   static const _first = 0xD3;
 
@@ -89,7 +89,7 @@ class RTKReader extends Service {
   @override
   Future<bool> init() async {
     if (!await serial.init()) {
-      logger.warning("could not open RTK on $rtkPort");
+      logger.warning("Could not open RTK on $rtkPort");
       return false;
     }
 
@@ -101,6 +101,7 @@ class RTKReader extends Service {
   @override
   Future<void> dispose() async {
     await _subscription?.cancel();
+    serial.stopListening();
     await serial.dispose();
   }
 }

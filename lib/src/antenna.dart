@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:io";
 import "dart:math";
 
 import "package:burt_network/burt_network.dart";
@@ -23,7 +24,8 @@ class AntennaControl extends Service {
 
   @override
   Future<bool> init() async {
-    final validPorts = DelegateSerialPort.allPorts.toSet().difference({"/dev/rtk_gps"});
+    final rtkPort = (await Process.run("realpath", ["/dev/rtk_gps"])).stdout.trim();
+    final validPorts = DelegateSerialPort.allPorts.toSet().difference({rtkPort});
 
     for (final port in validPorts) {
       final firmwareCandidate = BurtFirmwareSerial(port: port, logger: logger);

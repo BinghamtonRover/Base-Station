@@ -19,7 +19,7 @@ final subsystemsSocket = SocketInfo(
 /// for the RTK algorithm is done onboard the Rover's GPS device.
 class RTKReader extends Service {
   /// The COM port for the RTK GPS device
-  static const rtkPort = "/dev/rover_gps";
+  static const rtkPort = "COM5";
 
   static const _first = 0xD3;
 
@@ -66,16 +66,16 @@ class RTKReader extends Service {
         return;
       }
 
-      if (_buffer.length < 3 + size + 3 + 1) {
+      if (_buffer.length < 3 + size + 3) {
         // wait for the crc
         return;
       }
 
       final endIndex = 3 + size + 3;
 
-      final List<int> fullPacket = _buffer.sublist(0, endIndex + 1);
+      final List<int> fullPacket = _buffer.sublist(0, endIndex);
 
-      _buffer.removeRange(0, endIndex + 1);
+      _buffer.removeRange(0, endIndex);
 
       logger.debug("Decoded ${fullPacket.length} byte RTCM packet");
 

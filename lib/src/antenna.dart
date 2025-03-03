@@ -20,7 +20,7 @@ class AntennaControl extends Service {
 
   StreamSubscription<AntennaFirmwareData>? _firmwareSubscription;
   StreamSubscription<BaseStationCommand>? _commandSubscription;
-  StreamSubscription<GpsCoordinates>? _coordinatesSubscription;
+  StreamSubscription<RoverPosition>? _coordinatesSubscription;
 
   @override
   Future<bool> init() async {
@@ -54,10 +54,15 @@ class AntennaControl extends Service {
       constructor: BaseStationCommand.fromBuffer,
       callback: _handleBaseStationCommand,
     );
-    _coordinatesSubscription = collection.server.messages.onMessage<GpsCoordinates>(
-      name: GpsCoordinates().messageName,
-      constructor: GpsCoordinates.fromBuffer,
-      callback: _handleGpsData,
+    _coordinatesSubscription = collection.server.messages.onMessage<RoverPosition>(
+      name: RoverPosition().messageName,
+      constructor: RoverPosition.fromBuffer,
+      callback: (position) {
+        if (!position.hasGps()) {
+          return;
+        }
+        _handleGpsData(position.gps);
+      },
     );
     return true;
   }

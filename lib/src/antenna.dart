@@ -8,7 +8,7 @@ import "collection.dart";
 
 /// Receives base station commands and translate it into appropriate commands for
 /// the antenna firmware
-/// 
+///
 /// This also handles the logic for "auto tracking" the antenna to point towards the rover.
 class AntennaControl extends Service {
   /// Firmware for the antenna
@@ -49,12 +49,12 @@ class AntennaControl extends Service {
         _firmwareData.mergeFromMessage(message);
       },
     );
-    _commandSubscription = collection.server.messages.onMessage<BaseStationCommand>(
+    _commandSubscription = collection.server.messages.onMessage(
       name: BaseStationCommand().messageName,
       constructor: BaseStationCommand.fromBuffer,
       callback: _handleBaseStationCommand,
     );
-    _coordinatesSubscription = collection.server.messages.onMessage<RoverPosition>(
+    _coordinatesSubscription = collection.server.messages.onMessage(
       name: RoverPosition().messageName,
       constructor: RoverPosition.fromBuffer,
       callback: (position) {
@@ -92,7 +92,10 @@ class AntennaControl extends Service {
     }
   }
 
-  void _handleGpsData(GpsCoordinates coordinates, [bool isRoverOverride = false]) {
+  void _handleGpsData(
+    GpsCoordinates coordinates, [
+    bool isRoverOverride = false,
+  ]) {
     if (_currentCommand.mode != AntennaControlMode.TRACK_ROVER) {
       return;
     }
@@ -105,15 +108,12 @@ class AntennaControl extends Service {
         _currentCommand.hasBaseStationCoordinatesOverride()
             ? _currentCommand.baseStationCoordinatesOverride
             : BaseStationCollection.stationCoordinates;
-    final baseStationMeters = stationCoordinates.inMeters;
-    final roverMeters = coordinates.inMeters;
+    final baseStationMeters = stationCoordinates.toUTM();
+    final roverMeters = coordinates.toUTM();
 
-    final (deltaX, deltaY) = (
-      roverMeters.lat - baseStationMeters.lat,
-      roverMeters.long - baseStationMeters.long,
-    );
+    final delta = roverMeters - baseStationMeters;
 
-    final angle = atan2(deltaY, deltaX);
+    final angle = atan2(delta.y, delta.x);
 
     var targetDiff = angle - _firmwareData.swivel.targetAngle;
 
@@ -134,6 +134,7 @@ class AntennaControl extends Service {
     firmware?.sendMessage(
       AntennaFirmwareCommand(
         swivel: MotorCommand(angle: angle),
+        version: _currentCommand.version,
       ),
     );
   }

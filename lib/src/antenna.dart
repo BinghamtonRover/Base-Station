@@ -18,6 +18,12 @@ class AntennaControl extends Service {
 
   final AntennaFirmwareData _firmwareData = AntennaFirmwareData();
 
+  /// The last data received from the firmware
+  AntennaFirmwareData get firmwareData => _firmwareData;
+
+  /// The control mode of the antenna
+  AntennaControlMode get controlMode => _currentCommand.mode;
+
   StreamSubscription<AntennaFirmwareData>? _firmwareSubscription;
   StreamSubscription<BaseStationCommand>? _commandSubscription;
   StreamSubscription<RoverPosition>? _coordinatesSubscription;

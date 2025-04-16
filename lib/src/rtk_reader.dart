@@ -36,6 +36,9 @@ class RTKReader extends Service {
 
   final List<int> _buffer = [];
 
+  /// Whether or not the RTK reader is connected
+  bool get isConnected => serial.isOpen;
+
   StreamSubscription<List<int>>? _subscription;
 
   void _handlePacket(List<int> bytes) {

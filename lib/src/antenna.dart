@@ -24,8 +24,13 @@ class AntennaControl extends Service {
 
   @override
   Future<bool> init() async {
-    final rtkPort = (await Process.run("realpath", ["/dev/rover_gps"])).stdout.trim();
-    final validPorts = DelegateSerialPort.allPorts.toSet().difference({rtkPort});
+    final rtkPort =
+        (Platform.isWindows)
+            ? ""
+            : (await Process.run("realpath", ["/dev/rover_gps"])).stdout.trim();
+    final validPorts = DelegateSerialPort.allPorts.toSet().difference({
+      rtkPort,
+    });
 
     for (final port in validPorts) {
       final firmwareCandidate = BurtFirmwareSerial(port: port, logger: logger);
@@ -86,9 +91,9 @@ class AntennaControl extends Service {
     if (command.hasManualCommand() &&
         command.mode == AntennaControlMode.MANUAL_CONTROL) {
       firmware?.sendMessage(command.manualCommand);
-    } else if (command.hasRoverCoordinatesOverrideOverride() &&
+    } else if (command.hasRoverCoordinatesOverride() &&
         command.mode == AntennaControlMode.TRACK_ROVER) {
-      _handleGpsData(command.roverCoordinatesOverrideOverride, true);
+      _handleGpsData(command.roverCoordinatesOverride, true);
     }
   }
 
@@ -100,14 +105,25 @@ class AntennaControl extends Service {
       return;
     }
 
-    if (_currentCommand.hasRoverCoordinatesOverrideOverride() && !isRoverOverride) {
+    if (!_currentCommand.hasBaseStationCoordinates()) {
+      logger.warning(
+        "Insufficient data for auto tracking",
+        body: "No base station coordinates were provided",
+      );
+      return;
+    } else if (!_currentCommand.hasAngleTolerance()) {
+      logger.warning(
+        "Insufficient data for auto tracking",
+        body: "No angle tolerance was provided",
+      );
       return;
     }
 
-    final stationCoordinates =
-        _currentCommand.hasBaseStationCoordinatesOverride()
-            ? _currentCommand.baseStationCoordinatesOverride
-            : BaseStationCollection.stationCoordinates;
+    if (_currentCommand.hasRoverCoordinatesOverride() && !isRoverOverride) {
+      return;
+    }
+
+    final stationCoordinates = _currentCommand.baseStationCoordinates;
     final baseStationMeters = stationCoordinates.toUTM();
     final roverMeters = coordinates.toUTM();
 
@@ -115,7 +131,7 @@ class AntennaControl extends Service {
 
     final angle = atan2(delta.y, delta.x);
 
-    var targetDiff = angle - _firmwareData.swivel.targetAngle;
+    var targetDiff = angle - _firmwareData.swivel.currentAngle;
 
     if (targetDiff < -pi) {
       targetDiff += 2 * pi;
@@ -123,7 +139,7 @@ class AntennaControl extends Service {
       targetDiff -= 2 * pi;
     }
 
-    if (targetDiff.abs() < BaseStationCollection.angleTolerance) {
+    if (targetDiff.abs() < _currentCommand.angleTolerance) {
       logger.debug(
         "Ignoring GPS Data",
         body: "Antenna is already within the angle tolerance",

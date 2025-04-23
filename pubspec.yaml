@@ -5,12 +5,15 @@ publish_to: none
 repository: https://github.com/BinghamtonRover/Base-Station
 
 environment:
-  sdk: ^3.5.4
+  sdk: ^3.6.0
 
 # Add regular dependencies here.
 dependencies:
   burt_network:
-    git: https://github.com/BinghamtonRover/Networking
+    git:
+      url: https://github.com/BinghamtonRover/Rover-Code
+      path: burt_network
+      ref: 2.7.0
 
 dev_dependencies:
   test: ^1.24.0

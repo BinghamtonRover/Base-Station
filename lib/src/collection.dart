@@ -1,7 +1,7 @@
 import "package:burt_network/burt_network.dart";
 
 import "antenna.dart";
-import "gps.dart";
+import "rtk_reader.dart";
 
 final logger = BurtLogger();
 
@@ -9,14 +9,14 @@ class BaseStationCollection extends Service {
   // TODO: Add Device.BASE_STATION
   late final server = RoverSocket(port: 8005, device: Device.ARM, collection: this);
 
-  final gps = GpsReader();
+  final rtk = RTKReader();
   final antenna = AntennaControl();
 
   @override
   Future<bool> init() async {
     bool result = true;
     result &= await server.init();
-    result &= await gps.init();
+    result &= await rtk.init();
     result &= await antenna.init();
 
     if (result) {
@@ -31,7 +31,7 @@ class BaseStationCollection extends Service {
   @override
   Future<void> dispose() async {
     await server.dispose();
-    await gps.dispose();
+    await rtk.dispose();
     await antenna.dispose();
   }
 }

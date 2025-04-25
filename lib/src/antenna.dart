@@ -2,9 +2,8 @@ import "dart:async";
 import "dart:io";
 import "dart:math";
 
+import "package:base_station/base_station.dart";
 import "package:burt_network/burt_network.dart";
-
-import "collection.dart";
 
 /// Receives base station commands and translate it into appropriate commands for
 /// the antenna firmware

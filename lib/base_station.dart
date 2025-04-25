@@ -2,8 +2,8 @@ import "dart:async";
 
 import "package:burt_network/burt_network.dart";
 
-import "antenna.dart";
-import "rtk_reader.dart";
+import "src/antenna.dart";
+import "src/rtk_reader.dart";
 
 /// Logger for the base station program
 final logger = BurtLogger();

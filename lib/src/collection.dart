@@ -3,14 +3,14 @@ import "dart:async";
 import "package:burt_network/burt_network.dart";
 
 import "antenna.dart";
-import "gps.dart";
+import "rtk_reader.dart";
 
 final logger = BurtLogger();
 
 class BaseStationCollection extends Service {
   late final server = RoverSocket(port: 8005, device: Device.BASE_STATION, collection: this);
 
-  final gps = GpsReader();
+  final rtk = RTKReader();
   final antenna = AntennaControl();
 
   /// Timer to periodically send the base station data
@@ -27,7 +27,7 @@ class BaseStationCollection extends Service {
   Future<bool> init() async {
     bool result = true;
     result &= await server.init();
-    result &= await gps.init();
+    result &= await rtk.init();
     result &= await antenna.init();
 
     dataSendTimer = Timer.periodic(const Duration(milliseconds: 100), sendData);
@@ -44,7 +44,7 @@ class BaseStationCollection extends Service {
   @override
   Future<void> dispose() async {
     await server.dispose();
-    await gps.dispose();
+    await rtk.dispose();
     await antenna.dispose();
     dataSendTimer?.cancel();
   }

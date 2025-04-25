@@ -23,9 +23,6 @@ class RTKReader extends Service {
 
   static const _first = 0xD3;
 
-  /// Logger for the RTK reader service
-  final logger = BurtLogger();
-
   /// Serial device for the RTK gps, only sends RTCM3 packets
   late final SerialDevice serial = SerialDevice(
     portName: rtkPort,

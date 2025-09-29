@@ -29,6 +29,10 @@ class RTKReader extends Service {
     readInterval: const Duration(milliseconds: 10),
     logger: logger,
     baudRate: 38400,
+    bits: 8,
+    parity: SerialPortParity.none,
+    stopBits: 1,
+    xonXoff: SerialPortXonXoff.disabled,
   );
 
   final List<int> _buffer = [];

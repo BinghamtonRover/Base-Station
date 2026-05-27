@@ -19,12 +19,9 @@ final subsystemsSocket = SocketInfo(
 /// for the RTK algorithm is done onboard the Rover's GPS device.
 class RTKReader extends Service {
   /// The COM port for the RTK GPS device
-  static const rtkPort = "COM5";
+  static const rtkPort = "/dev/rover_gps";
 
   static const _first = 0xD3;
-
-  /// Logger for the RTK reader service
-  final logger = BurtLogger();
 
   /// Serial device for the RTK gps, only sends RTCM3 packets
   late final SerialDevice serial = SerialDevice(
@@ -32,6 +29,10 @@ class RTKReader extends Service {
     readInterval: const Duration(milliseconds: 10),
     logger: logger,
     baudRate: 38400,
+    bits: 8,
+    parity: SerialPortParity.none,
+    stopBits: 1,
+    xonXoff: SerialPortXonXoff.disabled,
   );
 
   final List<int> _buffer = [];

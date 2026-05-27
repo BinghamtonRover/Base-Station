@@ -5,23 +5,18 @@ packages:
     dependency: transitive
     description:
       name: _fe_analyzer_shared
-      sha256: "03f6da266a27a4538a69295ec142cb5717d7d4e5727b84658b63e1e1509bac9c"
+      sha256: da0d9209ca76bde579f2da330aeb9df62b6319c834fa7baae052021b0462401f
       url: "https://pub.dev"
     source: hosted
-    version: "79.0.0"
-  _macros:
-    dependency: transitive
-    description: dart
-    source: sdk
-    version: "0.3.3"
+    version: "85.0.0"
   analyzer:
     dependency: transitive
     description:
       name: analyzer
-      sha256: c9040fc56483c22a5e04a9f6a251313118b1a3c42423770623128fa484115643
+      sha256: "974859dc0ff5f37bc4313244b3218c791810d03ab3470a579580279ba971a48d"
       url: "https://pub.dev"
     source: hosted
-    version: "7.2.0"
+    version: "7.7.1"
   args:
     dependency: transitive
     description:
@@ -50,11 +45,11 @@ packages:
     dependency: "direct main"
     description:
       path: burt_network
-      ref: HEAD
-      resolved-ref: a52c8a984fcc4f6b022fa540c0ea13b55168ac22
-      url: "https://github.com/BinghamtonRover/Rover-Code.git"
+      ref: "3.0.0"
+      resolved-ref: "4619b4039b0ed0ab508e1e8cf9336612c0f77375"
+      url: "https://github.com/BinghamtonRover/Rover-Code"
     source: git
-    version: "2.4.0"
+    version: "3.0.0"
   collection:
     dependency: transitive
     description:
@@ -71,6 +66,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  coordinate_converter:
+    dependency: transitive
+    description:
+      name: coordinate_converter
+      sha256: ae14ad326551acbd6c384d717f508537340ed566a6e2412b7a908e8d3e7a1750
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.3"
   coverage:
     dependency: transitive
     description:
@@ -175,6 +178,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.0+1"
+  lists:
+    dependency: transitive
+    description:
+      name: lists
+      sha256: "4ca5c19ae4350de036a7e996cdd1ee39c93ac0a2b840f4915459b7d0a7d4ab27"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   logger:
     dependency: transitive
     description:
@@ -191,14 +202,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
-  macros:
-    dependency: transitive
-    description:
-      name: macros
-      sha256: "1d9e801cd66f7ea3663c45fc708450db1fa57f988142c64289142c9b7ee80656"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.3-main.0"
   matcher:
     dependency: transitive
     description:
@@ -215,6 +218,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.16.0"
+  mgrs_dart:
+    dependency: transitive
+    description:
+      name: mgrs_dart
+      sha256: fb89ae62f05fa0bb90f70c31fc870bcbcfd516c843fb554452ab3396f78586f7
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   mime:
     dependency: transitive
     description:
@@ -263,14 +274,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.1"
+  proj4dart:
+    dependency: transitive
+    description:
+      name: proj4dart
+      sha256: c8a659ac9b6864aa47c171e78d41bbe6f5e1d7bd790a5814249e6b68bc44324e
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   protobuf:
     dependency: transitive
     description:
       name: protobuf
-      sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
+      sha256: "75ec242d22e950bdcc79ee38dd520ce4ee0bc491d7fadc4ea47694604d22bf06"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "6.0.0"
   pub_semver:
     dependency: transitive
     description:
@@ -399,6 +418,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  unicode:
+    dependency: transitive
+    description:
+      name: unicode
+      sha256: "0f69e46593d65245774d4f17125c6084d2c20b4e473a983f6e21b7d7762218f1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   very_good_analysis:
     dependency: "direct dev"
     description:
@@ -455,6 +482,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+  wkt_parser:
+    dependency: transitive
+    description:
+      name: wkt_parser
+      sha256: "8a555fc60de3116c00aad67891bcab20f81a958e4219cc106e3c037aa3937f13"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   yaml:
     dependency: transitive
     description:
@@ -464,4 +499,4 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.6.0 <4.0.0"
+  dart: ">=3.9.0 <4.0.0"

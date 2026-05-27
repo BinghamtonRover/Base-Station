@@ -3,6 +3,7 @@ import "dart:io";
 import "dart:math";
 
 import "package:base_station/base_station.dart";
+import "package:base_station/src/rtk_reader.dart";
 import "package:burt_network/burt_network.dart";
 
 /// Receives base station commands and translate it into appropriate commands for
@@ -29,10 +30,9 @@ class AntennaControl extends Service {
 
   @override
   Future<bool> init() async {
-    final rtkPort =
-        (Platform.isWindows)
-            ? ""
-            : (await Process.run("realpath", ["/dev/rover_gps"])).stdout.trim();
+    final rtkPort = (Platform.isWindows)
+        ? RTKReader.rtkPort
+        : (await Process.run("realpath", ["/dev/rover_gps"])).stdout.trim();
     final validPorts = DelegateSerialPort.allPorts.toSet().difference({
       rtkPort,
     });
@@ -51,7 +51,7 @@ class AntennaControl extends Service {
     if (firmware == null) {
       return false;
     }
-    _firmwareSubscription = firmware?.messages.onMessage(
+    _firmwareSubscription = firmware?.messages.listenFor(
       name: AntennaFirmwareData().messageName,
       constructor: AntennaFirmwareData.fromBuffer,
       callback: (message) {
@@ -59,12 +59,12 @@ class AntennaControl extends Service {
         _firmwareData.mergeFromMessage(message);
       },
     );
-    _commandSubscription = collection.server.messages.onMessage(
+    _commandSubscription = collection.server.messages.listenFor(
       name: BaseStationCommand().messageName,
       constructor: BaseStationCommand.fromBuffer,
       callback: _handleBaseStationCommand,
     );
-    _coordinatesSubscription = collection.server.messages.onMessage(
+    _coordinatesSubscription = collection.server.messages.listenFor(
       name: RoverPosition().messageName,
       constructor: RoverPosition.fromBuffer,
       callback: (position) {
